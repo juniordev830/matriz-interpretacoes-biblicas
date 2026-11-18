@@ -24,3 +24,11 @@ Os exemplos incluem referências bíblicas, perguntas e anotações de demonstra
 Versão inicial funcional por linha de comando, sem interface web. Usa apenas a biblioteca padrão do Python. Os testes executam os exemplos e verificam as regras do projeto.
 
 A contagem considera os nomes de fontes informados; não verifica independência editorial nem valida conclusões teológicas.
+
+## Revisar teses com uma única fonte
+
+Execute `python app.py exemplo.json --fonte-unica` para listar apenas as teses
+que precisam de uma segunda referência, com a obra e os localizadores já
+anotados. Questões sem teses nessa condição ficam fora da lista. Acentos
+equivalentes em textos colados de editores diferentes contam como a mesma
+grafia. Edições com nomes diferentes continuam separadas.

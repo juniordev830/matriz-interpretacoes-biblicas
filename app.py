@@ -1,23 +1,35 @@
 'Agrupe teses de leitura por questão e identifique quais têm apenas uma fonte cadastrada.'
 
+from unicodedata import normalize
+
 
 def texto(value):
     if not isinstance(value, str) or not value.strip():
         raise ValueError("Use texto não vazio.")
-    return value.strip()
+    return normalize("NFC", value.strip())
 
 
-def run(data):
+def run(data, *, apenas_fonte_unica=False):
+    if not isinstance(data, dict) or not isinstance(data.get("registros"), list):
+        raise ValueError("O campo registros deve ser uma lista de fichas.")
     questoes = {}
-    for item in data["registros"]:
+    for numero, item in enumerate(data["registros"], start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"A ficha {numero} deve ser um objeto.")
         questao, tese = texto(item["questao"]), texto(item["tese"])
         fonte, local = texto(item["fonte"]), texto(item["localizador"])
         ficha = questoes.setdefault(questao, {}).setdefault(tese, {})
         ficha.setdefault(fonte, set()).add(local)
-    matriz = {questao: [{"tese": tese, "fontes": {f: sorted(ls) for f, ls in fontes.items()}}
-                        for tese, fontes in teses.items()]
-              for questao, teses in questoes.items()}
-    unica = sum(len(fontes) == 1 for teses in questoes.values() for fontes in teses.values())
+    matriz = {}
+    unica = 0
+    for questao, teses in questoes.items():
+        for tese, fontes in teses.items():
+            if len(fontes) == 1:
+                unica += 1
+            elif apenas_fonte_unica:
+                continue
+            ficha = {"tese": tese, "fontes": {f: sorted(locais) for f, locais in fontes.items()}}
+            matriz.setdefault(questao, []).append(ficha)
     return {"referencia": texto(data["referencia"]), "questoes": matriz,
             "teses_com_fonte_unica": unica}
 
@@ -43,6 +55,8 @@ def rejeitar_constante_json(constante):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("entrada", type=Path, help="Arquivo JSON com os dados")
+    parser.add_argument("--fonte-unica", action="store_true",
+                        help="Mostrar apenas as teses com uma única fonte cadastrada")
     args = parser.parse_args()
 
     try:
@@ -54,7 +68,7 @@ def main():
             )
         if not isinstance(data, dict):
             raise ValueError("A entrada deve ser um objeto JSON.")
-        result = run(data)
+        result = run(data, apenas_fonte_unica=args.fonte_unica)
     except (KeyError, TypeError, ValueError, OSError) as exc:
         parser.exit(2, f"Erro nos dados ou na execução: {exc}\n")
 
