@@ -35,6 +35,8 @@ def run(data, *, apenas_fonte_unica=False):
 
 
 import argparse
+import sys
+from relatorio_csv import escrever_csv
 import json
 from pathlib import Path
 
@@ -57,6 +59,7 @@ def main():
     parser.add_argument("entrada", type=Path, help="Arquivo JSON com os dados")
     parser.add_argument("--fonte-unica", action="store_true",
                         help="Mostrar apenas as teses com uma única fonte cadastrada")
+    parser.add_argument("--csv", action="store_true", help="Exportar as teses com suas fontes e localizadores em CSV")
     args = parser.parse_args()
 
     try:
@@ -72,7 +75,11 @@ def main():
     except (KeyError, TypeError, ValueError, OSError) as exc:
         parser.exit(2, f"Erro nos dados ou na execução: {exc}\n")
 
-    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
+    if args.csv:
+        sys.stdout.reconfigure(encoding="utf-8", newline="\n")
+        escrever_csv(result, sys.stdout)
+    else:
+        print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":
