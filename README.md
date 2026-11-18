@@ -32,3 +32,7 @@ que precisam de uma segunda referência, com a obra e os localizadores já
 anotados. Questões sem teses nessa condição ficam fora da lista. Acentos
 equivalentes em textos colados de editores diferentes contam como a mesma
 grafia. Edições com nomes diferentes continuam separadas.
+
+## Exportação para planilha
+
+Use `python app.py exemplo.json --csv > relatorio.csv` para exportar as teses com suas fontes e localizadores. O CSV usa ponto e vírgula, conserva a ordem do relatório e inclui o cabeçalho mesmo quando a seleção está vazia. O JSON continua sendo a saída padrão.
