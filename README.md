@@ -47,3 +47,7 @@ cat exemplo.json | python app.py -
 ## Filtrar por quantidade mínima de fontes
 
 Execute `python app.py exemplo.json --minimo-fontes 2` para mostrar somente teses com pelo menos duas fontes cadastradas distintas. Também funciona com `--csv`. Não combine com `--fonte-unica`. A contagem `teses_com_fonte_unica` continua refletindo o conjunto completo, mesmo após o filtro. A quantidade não comprova independência das obras ou a validade da tese.
+
+## Filtrar por quantidade mínima de fontes
+
+Execute `python app.py exemplo.json --minimo-fontes 2` para mostrar somente teses com pelo menos duas fontes cadastradas distintas. Também funciona com `--csv`. Não combine com `--fonte-unica`. A contagem `teses_com_fonte_unica` continua refletindo o conjunto completo. A quantidade não comprova independência das obras ou validade da tese.
