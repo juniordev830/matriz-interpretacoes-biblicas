@@ -42,3 +42,8 @@ Também é possível encadear a ferramenta com outro comando usando `-` como ent
 ```bash
 cat exemplo.json | python app.py -
 ```
+
+
+## Novo recurso
+
+O campo opcional `pesquisa` filtra questões por trecho, sem distinguir acentos ou maiúsculas. A contagem de teses com fonte única considera o subconjunto filtrado.
