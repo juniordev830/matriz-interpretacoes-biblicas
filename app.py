@@ -9,7 +9,11 @@ def texto(value):
     return normalize("NFC", value.strip())
 
 
-def run(data, *, apenas_fonte_unica=False):
+def run(data, *, apenas_fonte_unica=False, minimo_fontes=None):
+    if minimo_fontes is not None and (type(minimo_fontes) is not int or minimo_fontes < 1):
+        raise ValueError("minimo_fontes deve ser um inteiro positivo.")
+    if apenas_fonte_unica and minimo_fontes is not None:
+        raise ValueError("Escolha apenas um filtro de fontes.")
     if not isinstance(data, dict) or not isinstance(data.get("registros"), list):
         raise ValueError("O campo registros deve ser uma lista de fichas.")
     questoes = {}
@@ -27,6 +31,8 @@ def run(data, *, apenas_fonte_unica=False):
             if len(fontes) == 1:
                 unica += 1
             elif apenas_fonte_unica:
+                continue
+            if minimo_fontes is not None and len(fontes) < minimo_fontes:
                 continue
             ficha = {"tese": tese, "fontes": {f: sorted(locais) for f, locais in fontes.items()}}
             matriz.setdefault(questao, []).append(ficha)
@@ -61,7 +67,9 @@ MAX_JSON_BYTES = 1_000_000
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("entrada", help="Arquivo JSON com os dados ou - para a entrada padrão")
-    parser.add_argument("--fonte-unica", action="store_true",
+    filtros = parser.add_mutually_exclusive_group()
+    filtros.add_argument("--minimo-fontes", type=int, help="Exibir teses com pelo menos N fontes")
+    filtros.add_argument("--fonte-unica", action="store_true",
                         help="Mostrar apenas as teses com uma única fonte cadastrada")
     parser.add_argument("--csv", action="store_true", help="Exportar as teses com suas fontes e localizadores em CSV")
     args = parser.parse_args()
@@ -79,7 +87,7 @@ def main():
             )
         if not isinstance(data, dict):
             raise ValueError("A entrada deve ser um objeto JSON.")
-        result = run(data, apenas_fonte_unica=args.fonte_unica)
+        result = run(data, apenas_fonte_unica=args.fonte_unica, minimo_fontes=args.minimo_fontes)
     except RecursionError:
         parser.exit(2, "O JSON tem níveis de aninhamento demais.\n")
     except (KeyError, TypeError, ValueError, UnicodeError, OSError) as exc:
