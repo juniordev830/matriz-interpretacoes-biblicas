@@ -84,3 +84,31 @@ class JsonEstritoCliTest(unittest.TestCase):
                     self.assertEqual(resultado.returncode, 2)
                     self.assertIn(constante, resultado.stderr)
                     self.assertEqual(resultado.stdout, "")
+
+
+class MinimoFontesTest(unittest.TestCase):
+    def dados(self):
+        item = dict(questao="Q", tese="T1", fonte="A", localizador="1")
+        return dict(referencia="João 15", registros=[item, dict(item, fonte="B"),
+                    dict(item, tese="T2"), dict(item, tese="T2", localizador="2")])
+
+    def test_filtra_fontes_distintas(self):
+        from app import run
+        resultado = run(self.dados(), minimo_fontes=2)
+        self.assertEqual([t["tese"] for t in resultado["questoes"]["Q"]], ["T1"])
+        self.assertEqual(resultado["teses_com_fonte_unica"], 1)
+
+    def test_sem_resultado(self):
+        from app import run
+        self.assertEqual(run(self.dados(), minimo_fontes=3)["questoes"], {})
+
+    def test_filtros_incompativeis(self):
+        from app import run
+        with self.assertRaises(ValueError):
+            run(self.dados(), minimo_fontes=2, apenas_fonte_unica=True)
+
+    def test_rejeita_minimo_invalido(self):
+        from app import run
+        for value in (0, -1, True, "2"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                run(self.dados(), minimo_fontes=value)
