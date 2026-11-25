@@ -1,6 +1,6 @@
 'Agrupe teses de leitura por questão e identifique quais têm apenas uma fonte cadastrada.'
 
-from unicodedata import normalize
+from unicodedata import combining, normalize
 
 
 def texto(value):
@@ -20,9 +20,15 @@ def run(data, *, apenas_fonte_unica=False):
         fonte, local = texto(item["fonte"]), texto(item["localizador"])
         ficha = questoes.setdefault(questao, {}).setdefault(tese, {})
         ficha.setdefault(fonte, set()).add(local)
+    pesquisa = data.get("pesquisa")
+    def chave(value):
+        return "".join(c for c in normalize("NFKD", texto(value).casefold()) if not combining(c))
+    termo = chave(pesquisa) if pesquisa is not None else None
     matriz = {}
     unica = 0
     for questao, teses in questoes.items():
+        if termo is not None and termo not in chave(questao):
+            continue
         for tese, fontes in teses.items():
             if len(fontes) == 1:
                 unica += 1
